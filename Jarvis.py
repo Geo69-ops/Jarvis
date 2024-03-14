@@ -34,63 +34,60 @@ lang = 'en'
 # OPENAI_KEY = keyy
 # openai.api_key = OPENAI_KEY
 
-output = replicate.run(
-    "replicate/llama-7b:ac808388e2e9d8ed35a5bf2eaa7d83f0ad53f9e3df31a42e4eb0a0c3249b3165",
-    input={
-        "debug": False,
-        "top_p": 0.95,
-        "prompt": "Simply put, the theory of relativity states that",
-        "max_length": 500,
-        "temperature": 0.8,
-        "repetition_penalty": 1
-    }
-)
+def get_audio():
+        r= sr.Recognizer()
+        with sr.Microphone(device_index=1) as source:
+            audio = r.listen(source)
+            said = ""
 
-# The replicate/llama-7b model can stream output as it's running.
-# The predict method returns an iterator, and you can iterate over that output.
-for item in output:
-    # https://replicate.com/replicate/llama-7b/api#output-schema
-    print(item, end="")
+            try:
+                said= r.recognize_google(audio)
+                print(said)
 
+                if "Friday" in said:
+                    output = replicate.run("replicate/llama-7b:ac808388e2e9d8ed35a5bf2eaa7d83f0ad53f9e3df31a42e4eb0a0c3249b3165", 
+                                           input={"debug": False,
+                                                  "top_p": 0.95,
+                                                  "prompt": said,
+                                                  "max_length": 50,
+                                                  "temperature": 0.9,
+                                                  "repetition_penalty": 1})
 
+                    # The replicate/llama-7b model can stream output as it's running.
+                    # The predict method returns an iterator, and you can iterate over that output.
+                    mensaje = "" 
+                    for item in output:
+                        # https://replicate.com/replicate/llama-7b/api#output-schema
+                        print(item, end="")
+                        mensaje = mensaje + " " + item
 
-
-
-
-# def get_audio():
-#         r= sr.Recognizer()
-#         with sr.Microphone(device_index=1) as source:
-#             audio = r.listen(source)
-#             said = ""
-
-#             try:
-#                 said= r.recognize_google(audio)
-#                 print(said)
-
-#                 if "Friday" in said:
-#                     # completion = openai.ChatCompletion.create(model="gpt-3.5-turbo-0125", messages={"role": "user", "content": said})
-#                     # text = completion.choices[0].message.content
-#                     texto = "Hola estúpido humano, en qué puedo servirte"
-#                     audio2 = generate(
-#                          text=texto,
-#                          voice="Sam",
-#                          model= 'eleven_multilingual_v1'
-#                     )
-
-#                     # audio2.save("output.wav")
+                    # completion = openai.ChatCompletion.create(model="gpt-3.5-turbo-0125", messages={"role": "user", "content": said})
+                    # text = completion.choices[0].message.content
                     
-#                     play(audio2)
+                    texto = mensaje
+                    audio2 = generate(
+                         text=texto,
+                         voice="Sam",
+                         model= 'eleven_multilingual_v1'
+                    )
 
-#                     speech = gTTS(text=texto, lang=lang, slow=False,tld="com.co")
-#                     speech.save("welcome.mp3")
-#                     playsound.playsound("welcome.mp3")
-#                     os.remove("welcome.mp3")
-#             except Exception as e:
-#                 print(e)
-#         return said 
+                    # audio2.save("output.wav")
+                    
+                    play(audio2)
 
-# while True:
-#     get_audio()
+                    speech = gTTS(text=texto, lang=lang, slow=False,tld="com.co")
+                    speech.save("welcome.mp3")
+                    playsound.playsound("welcome.mp3")
+                    os.remove("welcome.mp3")
+            except Exception as e:
+                print(e)
+        return said 
+
+
+
+
+while True:
+    get_audio()
 
 
 
